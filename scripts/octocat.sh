@@ -28,4 +28,4 @@ if [ -z $url ]; then
   exit -1
 fi
 
-echo "::set-output name=url::$url"
+echo "::set-output name=upload_url::$url"
