@@ -41,23 +41,30 @@ jobs:
           TAG: ${{ env.TAG }}
         id: octocat
         run: bash scripts/octocat.sh
+      - name: Install Github CLI
+        run: |
+          curl -L https://hub.fastgit.org/cli/cli/releases/download/v${tag}/gh_${tag}_linux_amd64.tar.gz |\
+          tar -zxv &&\
+          sudo cp gh_${tag}_linux_amd64/bin/gh /usr/bin/ &&\
+          gh --version &&\
+          gh config set prompt disabled
+        env:
+          tag: 1.6.2
       - name: Upload ${{ env.AARCH32 }}
-        uses: actions/upload-release-asset@v1
+        run: gh release upload $TAG $FILES --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.octocat.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./${{ env.AARCH32 }}
-          asset_name: ${{ env.AARCH32 }}
-          # https://en.wikipedia.org/wiki/List_of_archive_formats
-          asset_content_type: application/x-gtar
-      - name: Upload ${{ env.AARCH64 }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.octocat.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./${{ env.AARCH64 }}
-          asset_name: ${{ env.AARCH64 }}
-          # https://en.wikipedia.org/wiki/List_of_archive_formats
-          asset_content_type: application/x-gtar
+          TAG: ${{ env.TAG }}
+          FILES: ${{ env.AARCH32 }} ${{ env.AARCH64 }}
+#      - name: Upload ${{ env.AARCH64 }}
+#        run: gh release upload $TAG $ASSET --clobber
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          TAG: ${{ env.TAG }}
+#          ASSET: ${{ env.AARCH32 }}
+#        with:
+#          upload_url: ${{ steps.octocat.outputs.upload_url }}
+#          asset_path: ./${{ env.AARCH64 }}
+#          asset_name: ${{ env.AARCH64 }}
+#          # https://en.wikipedia.org/wiki/List_of_archive_formats
+#          asset_content_type: application/x-gtar
