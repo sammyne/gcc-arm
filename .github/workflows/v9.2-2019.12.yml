@@ -25,22 +25,12 @@ jobs:
         run: |
           curl -LO $REPO/$TAG/binrel/$AARCH32 &&
           curl -LO $REPO/$TAG/binrel/$AARCH64
-#      - name: Create Release
-#        id: create_release
-#        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ env.TAG }}-${{ steps.parse_committed_at.outputs.committedAt }}
-#          release_name: Release ${{ env.TAG }}-${{ steps.parse_committed_at.outputs.committedAt }}
-#          draft: false
-#          prerelease: false
       # release should has been created before
-      - name: Run octocat
-        env:
-          TAG: ${{ env.TAG }}
-        id: octocat
-        run: bash scripts/octocat.sh
+#      - name: Run octocat
+#        env:
+#          TAG: ${{ env.TAG }}
+#        id: octocat
+#        run: bash scripts/octocat.sh
       - name: Install Github CLI
         run: |
           curl -L https://hub.fastgit.org/cli/cli/releases/download/v${tag}/gh_${tag}_linux_amd64.tar.gz |\
@@ -56,15 +46,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ env.TAG }}
           FILES: ${{ env.AARCH32 }} ${{ env.AARCH64 }}
-#      - name: Upload ${{ env.AARCH64 }}
-#        run: gh release upload $TAG $ASSET --clobber
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          TAG: ${{ env.TAG }}
-#          ASSET: ${{ env.AARCH32 }}
-#        with:
-#          upload_url: ${{ steps.octocat.outputs.upload_url }}
-#          asset_path: ./${{ env.AARCH64 }}
-#          asset_name: ${{ env.AARCH64 }}
-#          # https://en.wikipedia.org/wiki/List_of_archive_formats
-#          asset_content_type: application/x-gtar
