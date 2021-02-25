@@ -9,9 +9,7 @@ if [ -z $TAG ]; then
   exit -1
 fi
 
-# 9.2-2019.12
-curl -H "Accept: application/vnd.github.v3+json" $REPO/releases/tags/$TAG
-
+# @see https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
 url=$(curl -H "Accept: application/vnd.github.v3+json" $REPO/releases/tags/$TAG |\
   grep '"upload_url": ' |\
   head -n1              |\
