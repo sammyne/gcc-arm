@@ -16,22 +16,22 @@ jobs:
     name: Upload Release Asset
     runs-on: ubuntu-latest
     # @see https://ryangjchandler.co.uk/articles/running-github-actions-for-certain-commit-messages
-    if: "startsWith(${{ github.event.head_commit.message }},'feature(${{ REV }})')"
+    if: "startsWith(${{ github.event.head_commit.message }},'feature(${{ env.REV }})')"
     steps:
       - name: Download from binrel
         env:
           REPO: https://developer.arm.com/-/media/Files/downloads/gnu-a
         run: |
-          curl -LO ${{ REPO }}/${{ REV }}/binrel/${{ AARCH32 }} &&\
-          curl -LO ${{ REPO }}/${{ REV }}/binrel/${{ AARCH64 }}
+          curl -LO ${{ REPO }}/${{ env.REV }}/binrel/${{ AARCH32 }} &&\
+          curl -LO ${{ REPO }}/${{ env.REV }}/binrel/${{ AARCH64 }}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ REV }}
-          release_name: Release ${{ REV }}
+          tag_name: ${{ env.REV }}
+          release_name: Release ${{ env.REV }}
           draft: false
           prerelease: false
       - name: Upload ${{ AARCH32 }}
