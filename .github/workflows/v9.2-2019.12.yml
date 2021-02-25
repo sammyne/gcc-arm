@@ -16,41 +16,54 @@ jobs:
     name: Upload Release Asset
     runs-on: ubuntu-latest
     # @see https://ryangjchandler.co.uk/articles/running-github-actions-for-certain-commit-messages
-    if: "startsWith(${{ github.event.head_commit.message }},'feature(${{ env.REV }})')"
+    if: "startsWith(${{ github.event.head_commit.message }},'feature(9.2-2019.12)')"
     steps:
+      - uses: actions/checkout@v2
       - name: Download from binrel
         env:
           REPO: https://developer.arm.com/-/media/Files/downloads/gnu-a
         run: |
-          curl -LO ${{ REPO }}/${{ env.REV }}/binrel/${{ AARCH32 }} &&\
-          curl -LO ${{ REPO }}/${{ env.REV }}/binrel/${{ AARCH64 }}
+          curl -LO $REPO/$REV/binrel/$AARCH32 &&
+          curl -LO $REPO/$REV/binrel/$AARCH64 &&
+          echo "$REPO/$REV/binrel/$AARCH64"   &&
+          ls -l
+      # @see https://github.community/t/expose-commit-timestamp-in-the-github-context-data/16460/3
+      - name: Parse commit timestamp
+        id: parse_committed_at
+        run: |
+          committedAt=$(git show -s --format=%ci HEAD | sed 's/-/./g' | awk '{print $1"-"$2}' | sed 's/:/-/g');
+          echo "::set-output name=committedAt::$committedAt"
+#      - name: debug
+#        run: echo "$hello"
+#        env:
+#          hello: ${{ steps.parse_committed_at.outputs.committedAt }}
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.REV }}
-          release_name: Release ${{ env.REV }}
+          tag_name: ${{ env.REV }}-${{ steps.parse_committed_at.outputs.committedAt }}
+          release_name: Release ${{ env.REV }}-${{ steps.parse_committed_at.outputs.committedAt }}
           draft: false
           prerelease: false
-      - name: Upload ${{ AARCH32 }}
+      - name: Upload ${{ env.AARCH32 }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./${{ AARCH32 }}
-          asset_name: ${{ AARCH32 }}
+          asset_path: ./${{ env.AARCH32 }}
+          asset_name: ${{ env.AARCH32 }}
           # https://en.wikipedia.org/wiki/List_of_archive_formats
           asset_content_type: application/x-gtar
-      - name: Upload ${{ AARCH64 }}
+      - name: Upload ${{ env.AARCH64 }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./${{ AARCH64 }}
-          asset_name: ${{ AARCH64 }}
+          asset_path: ./${{ env.AARCH64 }}
+          asset_name: ${{ env.AARCH64 }}
           # https://en.wikipedia.org/wiki/List_of_archive_formats
           asset_content_type: application/x-gtar
